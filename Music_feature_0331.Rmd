@@ -1,0 +1,115 @@
+---
+title: '**【Music Feature】**'
+author: "Sam Lu"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+****
+<center>
+![Music genre](https://images.squarespace-cdn.com/content/v1/56b8f8efab48debb2efb2ef5/1555587249549-M8UGSQNDSFIQVC2EQUU4/Musical+genres.png?format=1000w){width=90%}
+</center>
+
+****
+#### **SML Data Project**
+* Motivating question
+* Focus problem
+* Data
+* Prelim EDA
+* Prelim models
+* Prelim remarks on focus problem and feasibility
+* Reference
+
+****
+### **Motivating Question**
+Music topic
+
+****
+### **Focus Problem**
+
+* genre classification
+* predict genre
+
+****
+### **Data**
+
+#### From 
+* [Kaggle](https://www.kaggle.com/datasets/insiyeah/musicfeatures)
+
+#### Variables
+* filename
+* tempo : The speed at which a passage of music is played
+* beats : Rhythmic unit in music
+* chroma_stft : Short Time Fourier Transform
+* rmse : Root Mean Square Error
+* spectral_centroid : Indicates where the "center of mass" of the spectrum is located.
+* spectral_bandwidth : It is the Wavelength interval in which a radiated spectral quantity is not less than half its maximum value
+* rolloff : Roll-off is the steepness of a transmission function with frequency
+* zero_crossing_rate : The rate at which the signal changes from positive to negative or back
+* mfcc1~20 : Mel-frequency cepstral coefficients (MFCCs) are coefficients that collectively make up an MFC.
+* label : Contains a string depicting the genre
+
+```{r include=FALSE}
+library(magrittr)
+library(tibble)
+library(dplyr)
+library(ggpubr)
+library(plotly)
+library(GGally)
+library(ggplot2)
+library(tidyverse)
+library(highcharter)
+library(knitr)
+library(dplyr)
+library(kableExtra)
+library(devtools)
+```
+
+```{r echo=FALSE}
+music_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv")
+#kable(music_feat[1:5,])
+kbl(music_feat,align = "c") %>%
+  kable_paper() %>%
+  kable_classic(full_width = F) %>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+****
+### **Prelim EDA**
+
+![Correlation matrix from python](D:/NDHU_Master/110-2/KML/Project/fig/python/matrix/Correlation Matrix.png)
+
+#### **Pairs**
+```{r echo=FALSE}
+ggpairs(music_feat[2:11])
+```
+
+#### **PCA**
+
+```{r echo=FALSE}
+data_PCA = prcomp(music_feat[,2:29], center = TRUE,scale. = TRUE)
+data_PCA_12 = cbind(data_PCA$x[,1], data_PCA$x[,2])
+data_PCA_12 = as.data.frame(data_PCA_12)
+data_PCA_h = cbind(data_PCA_12, music_feat$label)
+data_PCA_h = as.data.frame(data_PCA_h)
+colnames(data_PCA_h) = c('PC1', 'PC2', 'label')
+
+hchart(data_PCA_h, "scatter", hcaes(x = PC1, y = PC2, group = label))
+
+```
+
+****
+### **Prelim Models**
+****
+### **Prelim Remarks on Focus problem and feasibility**
+
+* Variable selection
+* Meaning of each variables
+
+****
+### **Reference**
+* [Music feature dataset from Kaggle](https://www.kaggle.com/datasets/insiyeah/musicfeatures)
+* [MARSYAS](http://marsyas.info/)
+* [Python package librosa](https://librosa.org/doc/latest/index.html)
+

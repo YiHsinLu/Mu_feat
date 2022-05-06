@@ -1,0 +1,176 @@
+```{r}
+library(magrittr)
+library(tibble)
+library(dplyr)
+library(ggpubr)
+library(plotly)
+library(GGally)
+library(ggplot2)
+library(tidyverse)
+library(highcharter)
+music_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv")
+```
+
+# Functio of standardization 
+```{r}
+stn = function(x){
+  stn_x = x
+  for(p in c(1:length(x[1,]))){
+    if(class(x[,p])!="character"&var(x[,p])!=0){
+      stn_x[,p] = (x[,p]-mean(x[,p]))/sqrt(var(x[,p]))
+    }
+  }
+  colnames(stn_x)=colnames(x)
+  rownames(stn_x)=rownames(x)
+  return(stn_x)
+}
+```
+
+```{r}
+for(i in 2:29){
+  hist(music_feat[,i], nclass = 100, main = colnames(music_feat)[i])
+}
+```
+
+
+```{r}
+ggpairs(music_feat[,-1])
+```
+
+```{r}
+ggpairs(music_feat[2:9])
+```
+
+
+```{r}
+ggpairs(music_feat[11:17])
+```
+
+```{r}
+data_standardization = stn(music_feat)
+```
+
+
+```{r}
+
+data_nu = music_feat[,2:9]
+```
+
+```{r}
+data_nu = music_feat[,2:9]
+mds_data <- dist(data_nu, method = "euclidean") %>%          
+cmdscale() %>%
+as_tibble()
+
+mds_data = cbind(mds_data,data_standardization$label)
+
+ggscatter(mds_data, x = "V1", y = "V2", 
+          label = rownames(mds_data),
+          color = "data_standardization$label",
+          palette = "jco",
+          size = 1, 
+          ellipse = TRUE,
+          ellipse.type = "convex",
+          repel = TRUE)
+```
+
+```{r}
+data_PCA = prcomp(music_feat[,2:29], center = TRUE,scale. = TRUE)
+summary(data_PCA)
+```
+
+```{r}
+library(devtools)
+library(ggbiplot)
+ggbiplot(data_PCA)
+```
+
+
+```{r}
+#ggbiplot(data_PCA,ellipse=TRUE,choices=c(1,2),   labels="", groups=music_feat$label)
+#png(file="D:/NDHU Master/110-2/KML/fig/R/PCA.png",width = 1024, height = 1024)
+ggbiplot(data_PCA, obs.scale = 1, var.scale = 1, group=music_feat$label,
+     varname.size = 5, labels.size=5, ellipse = F, circle = F) +
+theme(legend.direction ="horizontal", 
+      legend.position = "top")
+#dev.off()
+```
+
+```{r}
+data_PCA = prcomp(music_feat[,2:29], center = TRUE,scale. = TRUE)
+data_PCA_12 = cbind(data_PCA$x[,1], data_PCA$x[,2])
+data_PCA_12 = as.data.frame(data_PCA_12)
+data_PCA_h = cbind(data_PCA_12, music_feat$label)
+data_PCA_h = as.data.frame(data_PCA_h)
+colnames(data_PCA_h) = c('PC1', 'PC2', 'label')
+
+hchart(data_PCA_h, "scatter", hcaes(x = PC1, y = PC2, group = label))
+
+```
+
+```{r}
+qplot(PC1, PC2, data = data_PCA_h, color = label)
+```
+
+```{r}
+music_feat_data = music_feat[,-1]
+label_num = matrix(data = c(rep(1,100),
+                            rep(2,100),
+                            rep(3,100),
+                            rep(4,100),
+                            rep(5,100),
+                            rep(6,100),
+                            rep(7,100),
+                            rep(8,100),
+                            rep(9,100),
+                            rep(10,100)))
+
+music_feat_data$label = label_num
+music_feat_lm = glm(formula = label ~ ., data = music_feat_data)
+```
+
+```{r}
+summary(music_feat_lm)
+```
+
+```{r}
+dataset1 = cbind(music_feat[,2],music_feat[,3])
+dataset1 = cbind(dataset1, music_feat[,30])
+colnames(dataset1)=c('temp','beats','label')
+dataset1 = as.data.frame(dataset1)
+hchart(dataset1, "scatter", hcaes(x = temp, y = beats, group = label))
+
+```
+
+```{r}#
+library(stsne)
+```
+
+```{r}#
+data_Sutsne = Sutsne(Y = music_feat$label, X = music_feat[,2:29], weight_by_var = FALSE, Y_weight = 1000, X_weight = 1,check_duplicates = FALSE) %$%
+  Y %>%
+  as.data.frame() %>%
+  cbind(music_feat$label) %>%
+  `names<-`(c("x","y","group"))
+
+
+```
+
+```{r}#
+
+music_feat_stsne = as.data.frame(music_feat)
+data_stsne = stsne(music_feat_stsne)
+```
+
+```{r}#
+data_stsne_g = cbind(data_stsne$Y, music_feat$label)
+data_stsne_g = as.data.frame(data_stsne_g)
+colnames(data_stsne_g) = c('x','y','group')
+```
+
+```{r}#
+ggplot(data_stsne_g, aes(x=x,y=y,color = group),) +
+   geom_point() +
+   ggtitle("Music Feature") 
+
+```
