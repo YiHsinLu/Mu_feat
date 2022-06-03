@@ -1,0 +1,79 @@
+---
+title: '**【Introduction】 Music feature**'
+author: "*Sam Lu*"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+****
+
+# **Features/Variables**
+
+* **filename**
+* **tempo** : The speed at which a passage of music is played
+* **beats** : Rhythmic unit in music
+* **chroma_stft** : Short Time Fourier Transform
+* **rmse** : Root Mean Square Error
+* **spectral_centroid** : Indicates where the "center of mass" of the spectrum is located.
+* **spectral_bandwidth** : It is the Wavelength interval in which a radiated spectral quantity is not less than half its maximum value
+* **rolloff** : Roll-off is the steepness of a transmission function with frequency
+* **zero_crossing_rate** : The rate at which the signal changes from positive to negative or back
+* **mfcc1~20** : Mel-frequency cepstral coefficients (MFCCs) are coefficients that collectively make up an MFC.
+* **label** : Contains a string depicting the genre
+
+****
+
+****
+
+## **filename**
+
+****
+
+## **tempo**
+Speed of music. Generally it is measured as the number of beats per minute, where the beat is the basic measure of time in music.
+
+****
+
+## **beats**
+
+
+****
+
+## **chroma_stft**
+
+****
+
+## **rmse**
+
+****
+
+## **spectral_centroid**
+
+****
+
+## **spectral_bandwidth**
+
+****
+
+## **rolloff**
+
+****
+
+## **zero_crossing_rate**
+
+****
+
+## **mfcc1~20**
+
+****
+
+## **label**
+
+****
+
+# **Reference**
+
+* [What's the Difference Between Tempo and Rhythm?](https://www.britannica.com/story/whats-the-difference-between-tempo-and-rhythm)
+
