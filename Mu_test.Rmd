@@ -1,0 +1,59 @@
+```{r}
+tempo_beats = lm(tempo~beats, data=mu_feat)
+```
+
+```{r}
+summary(tempo_beats)
+```
+
+```{r}
+x = as.data.frame(music_feat$beats)
+colnames(x)='beats'
+pre = predict(tempo_beats, x)
+
+y = mu_feat$tempo
+
+sum((pre-y)^2)/1000
+```
+
+```{r}
+library(knitr)
+library(dplyr)
+library(flextable)
+library(magrittr)
+library(kableExtra)
+library(tidytext)
+library(tidyverse)
+library(plot.matrix)
+library(stringr)
+library(micropan)
+library(ggpubr)
+library(highcharter)
+library(ggpubr)
+# Change histogram plot line colors by groups
+# Change histogram plot line colors by groups
+ggplot(mu_feat, aes(x=tempo, y=beats)) +
+    geom_point(aes(color=label))
+
+ggplot(mu_feat, aes(x=tempo, y=beats)) +
+    geom_point(aes(color=label))
+
+```
+
+```{r}
+y = Y_mufeat
+
+colnames(y)='word'
+y_text = y%>%
+  unnest_tokens(words,word)
+
+y_count = y_text%>%
+  count(words,sort=TRUE)
+y_count
+```
+
+```{r}
+hist(mu_feat$tempo/mu_feat$beats)
+plot(1:1000,mu_feat$tempo/mu_feat$beats)
+
+```
