@@ -37,7 +37,7 @@ rownames(Y_nu) = rownames(Y_mufeat) = rownames(X_mufeat)
 
 
 
-set.seed(610911007)
+set.seed(10)
 sel = multiSample(1000,10,75)
 
 

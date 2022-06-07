@@ -1,0 +1,125 @@
+```{r}
+set.seed(608*320)
+multiSample = function(n,g,k){
+  # totally n members
+  # for g groups
+  # take k members from each group
+  if(n%%g==0){
+    ms = c()
+    ng = n/g
+    for(i in 1:g){
+      init = (i-1)*ng+1
+      ms = cbind(ms, sample(init:(i*ng), k, replace = FALSE))
+    }
+    return(sort(ms))
+  }else{
+    print('Error: n could not divided by g')
+  }
+}
+sel = multiSample(1000,10,80)
+mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
+
+Xtrain = mu_feat[sel,]
+Xtest = mu_feat[-sel,]
+
+
+```
+
+
+
+```{r}
+multiSample = function(n,g,k){
+  # totally n members
+  # for g groups
+  # take k members from each group
+  if(n%%g==0){
+    ms = c()
+    ng = n/g
+    for(i in 1:g){
+      init = (i-1)*ng+1
+      ms = cbind(ms, sample(init:(i*ng), k, replace = FALSE))
+    }
+    return(sort(ms))
+  }else{
+    print('Error: n could not divided by g')
+  }
+}
+
+
+mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
+
+
+set.seed(610911007)
+sel = multiSample(1000,10,80)
+
+mu_feat_nu = mu_feat
+Y_nu = as.data.frame(sapply(factor(mu_feat$label), unclass))
+colnames(Y_nu) = 'ladel'
+
+mu_feat_nu$label = Y_nu
+
+colnames(mu_feat_nu[,29]) = 'label'
+rownames(Y_nu) = rownames(mu_feat)
+
+Xtrain_nu = mu_feat_nu[sel,]
+Xtest_nu = mu_feat_nu[-(sel),]
+colnames(Xtrain_nu) = colnames(Xtest_nu) = colnames(mu_feat)
+
+
+
+
+
+Xtrain_scale = scale(Xtrain_nu[,1:28])
+Xtest_scale = scale(Xtest_nu[,1:28])
+
+
+
+
+classifier = naiveBayes(label ~ ., data = Xtrain_nu)
+
+
+
+
+# Predicting on test data'
+Y_pred <- predict(classifier, newdata = Xtest_nu)
+
+
+
+
+
+# Confusion Matrix
+cm <- table(Xtest_nu$label, Y_pred)
+cm
+
+
+
+
+# Model Evaluation
+confusionMatrix(cm)
+```
+
+```{r}
+set.seed(608*320)
+library(e1071)
+
+reg = glm(label ~ ., data = Xtrain_nu, family = "binomial")
+
+summary(reg)
+```
+
+```{r}
+# Predicting on test data'
+y_pred <- predict(reg, newdata = Xtest_nu)
+
+
+
+# Confusion Matrix
+cm <- table(Xtest_nu$label, y_pred)
+cm
+
+
+
+
+# Model Evaluation
+confusionMatrix(cm)
+```

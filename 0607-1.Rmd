@@ -1,0 +1,206 @@
+
+
+```{r}
+token_split = function(df, g, id=rownames(df)){
+#parameters
+  n = nrow(df) #numbers of row
+  colnames(df) = c("id", "word") 
+  
+#g=1
+#text mining to take the tokens from column--"word" for each row
+df_1g = df%>%
+  unnest_tokens(words,word)#turn a block into few tokens
+colnames(df_1g)=c("id","word")
+data(stop_words)
+df_1g = df_1g%>%
+  anti_join(stop_words)#delete the stop words
+
+#token list for one-gram
+token1 = df_1g%>%
+  group_by()%>%
+  count(word,sort=TRUE)%>%
+  ungroup()#count the number of the token showed
+
+#g=2
+df_2g <- df %>%
+  unnest_tokens(words, word, token = "ngrams", n = 2)
+colnames(df_2g)=c("id","word")
+data(stop_words)
+df_2g = df_2g%>%
+  anti_join(stop_words)#delete the stop words
+
+#token list for two-grams
+token2 = df_2g%>%
+  group_by()%>%
+  count(word,sort=TRUE)%>%
+  ungroup()#count the number of the token showed
+
+#list function
+lappend <- function (lst, ...){
+  lst <- c(lst, list(...))
+  return(lst)
+}
+
+#list of token in each musicians(one-gram)
+token_list_1g = list()
+for(i in id){
+  token_pr = subset(df_1g,id==i)[2]
+  token_list_1g = lappend(token_list_1g, token_pr)
+  token_pr = c()
+}
+
+#list of token in each musicians(two-grams)
+token_list_2g = list()
+for(i in id){
+  token_pr = rbind(subset(df_1g,id==i)[2], subset(df_2g,id==i)[2])
+  token_list_2g = lappend(token_list_2g, token_pr)
+  token_pr = c()
+}
+
+if(g==1){
+  return(list(id=id, token_list1=token1$word, df_token_lst=token_list_1g))
+}else{
+  return(list(id=id, token_list1=token1$word, token_list2=token2$word, df_token_lst=token_list_2g))
+}
+}
+```
+
+
+```{r}
+df_Y = cbind(rownames(mu_feat), Y_mufeat)
+
+ts.y = token_split(df = df_Y, g=1)
+
+genre = ts.y$token_list1
+```
+
+
+
+```{r}
+library(caret)
+
+#define one-hot encoding function
+dummy <- dummyVars(" ~ .", data=Y_mufeat)
+
+#perform one-hot encoding on data frame
+y_ohencoding <- data.frame(predict(dummy, newdata=Y_mufeat))
+
+#view final data frame
+y_ohencoding
+
+```
+
+```{r}
+colnames(y_ohencoding)=genre
+y_ohencoding
+```
+```{r}
+set.seed(608*320)
+multiSample = function(n,g,k){
+  # totally n members
+  # for g groups
+  # take k members from each group
+  if(n%%g==0){
+    ms = c()
+    ng = n/g
+    for(i in 1:g){
+      init = (i-1)*ng+1
+      ms = cbind(ms, sample(init:(i*ng), k, replace = FALSE))
+    }
+    return(sort(ms))
+  }else{
+    print('Error: n could not divided by g')
+  }
+}
+sel = multiSample(1000,10,80)
+mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
+
+Xtrain = mu_feat[sel,]
+Xtest = mu_feat[-sel,]
+
+
+```
+
+
+```{r}
+set.seed(608*320)
+library(e1071)
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+svm_std = tune.svm(as.factor(label) ~., data = Xtrain, 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_std)
+```
+
+```{r}
+y_pre = predict(svm_std$best.model, Xtest[,1:28])
+y = as.factor(Xtest[,29])
+
+
+Con_Matr = confusionMatrix(
+  factor(y_pre),
+  factor(y)
+)
+
+
+Con_Matr
+```
+
+
+#std
+
+```{r}
+set.seed(608*320)
+multiSample = function(n,g,k){
+  # totally n members
+  # for g groups
+  # take k members from each group
+  if(n%%g==0){
+    ms = c()
+    ng = n/g
+    for(i in 1:g){
+      init = (i-1)*ng+1
+      ms = cbind(ms, sample(init:(i*ng), k, replace = FALSE))
+    }
+    return(sort(ms))
+  }else{
+    print('Error: n could not divided by g')
+  }
+}
+sel = multiSample(1000,10,80)
+mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
+
+Xtrain = as.data.frame(cbind(scale(mu_feat[sel,1:28]), mu_feat[sel, 29]))
+Xtest = as.data.frame(cbind(scale(mu_feat[-sel,1:28]), mu_feat[-sel, 29]))
+
+colnames(Xtrain)=colnames(Xtest)=colnames(mu_feat)
+
+```
+
+
+
+
+```{r}
+set.seed(608*320)
+library(e1071)
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+svm_std = svm(as.factor(label) ~., data = Xtrain, scale = T)
+
+summary(svm_std)
+```
+
+```{r}
+y_pre = predict(svm_std, Xtest[,-29])
+y = as.factor(Xtest[,29])
+
+
+Con_Matr = confusionMatrix(
+  factor(y_pre),
+  factor(y)
+)
+
+
+Con_Matr
+```

@@ -1,0 +1,166 @@
+
+multiSample = function(n,g,k){
+  # totally n members
+  # for g groups
+  # take k members from each group
+  if(n%%g==0){
+    ms = c()
+    ng = n/g
+    for(i in 1:g){
+      init = (i-1)*ng+1
+      ms = cbind(ms, sample(init:(i*ng), k, replace = FALSE))
+    }
+    return(sort(ms))
+  }else{
+    print('Error: n could not divided by g')
+  }
+}
+
+lappend <- function (lst, ...){
+  lst <- c(lst, list(...))
+  return(lst)
+}
+  
+  
+sample_group = function(n, G, g){
+  # totally n members
+  # by balance, need group by G
+  # split data to g class
+  sel_g = c()
+  for(i in 1:G){
+    sel = c()
+    Gi =  ((i-1)*(n/G)+1):(i*(n/G))
+    for(j in 1:g){
+      sam_v = sort(sample(Gi, (n/(G*g)), replace = FALSE))
+      sam = matrix(data = sam_v, nrow = (n/(G*g)), ncol = 1)
+      sel = cbind(sel,sam)
+      Gi = setdiff(Gi,sam_v)
+    }
+    sel_g = rbind(sel_g,sel)
+  }
+  sel_g = as.data.frame(sel_g)
+  return(sel_g)
+}
+
+
+
+set.seed(608*320)
+sg = sample_group(1000,10,5)
+
+
+
+#split data
+
+mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
+#G1
+Xtest_1 = mu_feat[sg$V1,]
+Xtrain_1 = mu_feat[-sg$V1,]
+#G2
+Xtest_2 = mu_feat[sg$V2,]
+Xtrain_2 = mu_feat[-sg$V2,]
+#G3
+Xtest_3 = mu_feat[sg$V3,]
+Xtrain_3 = mu_feat[-sg$V3,]
+#G4
+Xtest_4 = mu_feat[sg$V4,]
+Xtrain_4= mu_feat[-sg$V4,]
+#G5
+Xtest_5 = mu_feat[sg$V5,]
+Xtrain_5 = mu_feat[-sg$V5,]
+
+Xtrain_cv = list(Xtrain_1,Xtrain_2,Xtrain_3,Xtrain_4,Xtrain_5)
+Xtest_cv = list(Xtest_1,Xtest_2,Xtest_3,Xtest_4,Xtest_5)
+
+
+
+#1
+set.seed(608*320)
+library(e1071)
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+svm_1 = tune.svm(as.factor(label) ~., data = Xtrain_cv[[1]], 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_1)
+
+y_pre1 = predict(svm_1$best.model, Xtest_cv[[1]][,1:28])
+
+y1 = as.factor(Xtest_cv[[1]][,29])
+
+confusionMatrix(
+  factor(y_pre1),
+  factor(y1)
+)
+
+#2
+set.seed(608*320)
+library(e1071)
+
+svm_2 = tune.svm(as.factor(label) ~., data = Xtrain_cv[[2]], 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_2)
+
+y_pre2 = predict(svm_2$best.model, Xtest_cv[[2]][,1:28])
+
+y2 = as.factor(Xtest_cv[[2]][,29])
+
+confusionMatrix(
+  factor(y_pre2),
+  factor(y2)
+) 
+
+#3
+set.seed(608*320)
+library(e1071)
+
+svm_3 = tune.svm(as.factor(label) ~., data = Xtrain_cv[[3]], 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_3)
+
+y_pre3 = predict(svm_3$best.model, Xtest_cv[[3]][,1:28])
+
+y3 = as.factor(Xtest_cv[[3]][,29])
+
+confusionMatrix(
+  factor(y_pre3),
+  factor(y3)
+) 
+
+#4
+set.seed(608*320)
+library(e1071)
+
+svm_4 = tune.svm(as.factor(label) ~., data = Xtrain_cv[[4]], 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_4)
+
+y_pre4 = predict(svm_4$best.model, Xtest_cv[[4]][,1:28])
+
+y4 = as.factor(Xtest_cv[[4]][,29])
+
+confusionMatrix(
+  factor(y_pre4),
+  factor(y4)
+) 
+
+#5
+set.seed(608*320)
+library(e1071)
+
+svm_5 = tune.svm(as.factor(label) ~., data = Xtrain_cv[[5]], 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_5)
+
+y_pre5 = predict(svm_5$best.model, Xtest_cv[[5]][,1:28])
+
+y5 = as.factor(Xtest_cv[[5]][,29])
+
+confusionMatrix(
+  factor(y_pre5),
+  factor(y5)
+)
+  

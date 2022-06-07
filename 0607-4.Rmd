@@ -1,0 +1,32 @@
+```{r}
+Mu_train = read.csv("D:/music_feature/Data_sets/data.csv", row.names = 1)
+Mu_test = read.csv("D:/music_feature/Data_sets/data_2genre_str.csv", row.names = 1)
+
+```
+
+```{r}
+set.seed(608*320)
+library(e1071)
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+svm_clsfr = tune.svm(as.factor(label)~., data = Mu_train, 
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_clsfr)
+```
+
+```{r}
+y_pre = predict(svm_clsfr$best.model, Mu_test[,1:28])
+y = as.factor(Mu_test$label)
+
+
+Con_Matr = confusionMatrix(factor(y_pre),
+                           factor(y))
+
+
+Con_Matr
+```
+
+```{r}
+class_pop = mu_feat[c(101:200,701:800),]
+```
