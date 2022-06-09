@@ -147,6 +147,15 @@ Con_Matr = confusionMatrix(
 Con_Matr
 ```
 
+```{r}
+A = mu_feat[,1:28]
+A_std = scale(A)
+A_std = as.data.frame(A_std)
+A_std = cbind(A_std, mu_feat[,29])
+A_std = as.data.frame(A_std)
+class(A_std[1,1])
+```
+
 
 #std
 
@@ -171,14 +180,33 @@ multiSample = function(n,g,k){
 sel = multiSample(1000,10,80)
 mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
 
-Xtrain = as.data.frame(cbind(scale(mu_feat[sel,1:28]), mu_feat[sel, 29]))
-Xtest = as.data.frame(cbind(scale(mu_feat[-sel,1:28]), mu_feat[-sel, 29]))
+Xtrain = mu_feat[sel,]
+Xtest = mu_feat[-sel,]
 
-colnames(Xtrain)=colnames(Xtest)=colnames(mu_feat)
+
+Xtrain_std = matrix_std(Xtrain,28)
+Xtest_std = matrix_std(Xtest,28)
+
+colnames(Xtrain_std)=colnames(Xtest_std)=colnames(mu_feat)
+
+rownames(Xtrain_std) = rownames(Xtrain)
+rownames(Xtest_std) = rownames(Xtest)
 
 ```
 
 
+
+```{r}
+
+matrix_std = function(df,p){
+  df_std = df[,1:p]
+  df_std = scale(df_std)
+  df_std = as.data.frame(df_std)
+  df_std = cbind(df_std, df[,(p+1)])
+  df_std = as.data.frame(df_std)
+  return(df_std)
+}
+```
 
 
 ```{r}
@@ -186,20 +214,17 @@ set.seed(608*320)
 library(e1071)
 gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
 
-svm_std = svm(as.factor(label) ~., data = Xtrain, scale = T)
+svm_std = tune.svm(as.factor(label) ~., data = Xtrain_std,
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
 
 summary(svm_std)
 ```
 
 ```{r}
-y_pre = predict(svm_std, Xtest[,-29])
-y = as.factor(Xtest[,29])
+y_pre = predict(svm_std$best.model, Xtest_std[,-29])
 
 
-Con_Matr = confusionMatrix(
-  factor(y_pre),
-  factor(y)
-)
+Con_Matr = confusionMatrix(Xtest_std$label, y_pre)
 
 
 Con_Matr

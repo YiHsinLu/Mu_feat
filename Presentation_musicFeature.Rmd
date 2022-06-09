@@ -1,0 +1,94 @@
+---
+title: "**【Music Feature】** prediction of music genre"
+author: "Yi-Hsin Lu"
+date: "June 9, 2022"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
+---
+
+****
+
+# **【Outline】**
+
+* Introduction
+* Data
+* EDA
+* Model
+* Conclusion
+* Reference
+
+****
+
+# **1. Introduction**
+
+****
+
+### 1.1 Motivating Question
+
+* Music
+* Musicians 
+* Instruments
+
+****
+
+### 1.2 Focus problem:  Predict the genre of music
+
+****
+
+```{r echo=FALSE}
+library(wordcloud2)
+set.seed(19970608)
+genre_wordCloud = read.csv('D:/music_feature/Data_sets/genre_wordCloud.csv')
+wordcloud2(data=genre_wordCloud, size=0.5, color='random-dark')
+```
+
+
+* [Kaggle](https://www.kaggle.com/datasets/insiyeah/musicfeatures)
+
+****
+
+# **2. Data**
+
+
+
+****
+
+## 2.1 Variables
+
+* tempo
+* beats
+* chroma_stft
+* rmse
+* spectral_centroid
+* spectral_bandwidth
+* rolloff
+* zero_crossing_rate
+* mfcc1~20
+* label
+
+****
+
+# **3. EDA**
+
+## ggpair
+
+## PCA
+
+## t-SNE
+
+# Model
+
+## Logistic Regression
+
+## Random Forest
+
+## CART
+
+## SVM
+
+# Conclusion
+
+# Reference

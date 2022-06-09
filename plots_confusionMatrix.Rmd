@@ -1,0 +1,57 @@
+```{r include=FALSE}
+#packages
+library(knitr)
+library(dplyr)
+library(flextable)
+library(magrittr)
+library(kableExtra)
+library(tidytext)
+library(tidyverse)
+library(plot.matrix)
+library(stringr)
+library(micropan)
+library(ggpubr)
+library(highcharter)
+library(ggpubr)
+library(tm)
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+library(wordcloud2)
+library(e1071)
+library(nnet)
+library(rpart)
+library(randomForest)
+```
+
+```{r}
+confusion_matrix_svm
+"Accuracy : 0.67"
+confusion_matrix_svm_std
+"Accuracy : 0.69"
+confusion_matrix_logreg
+"Accuracy : 0.55"
+confusion_matrix_ranforest
+"Accuracy : 0.69"
+confusion_matrix_ranforest_std
+"Accuracy : 0.7"
+```
+
+```{r}
+table <- data.frame(confusion_matrix_ranforest_std$table)
+
+plotTable <- table %>%
+  mutate(goodbad = ifelse(table$Prediction == table$Reference, "good", "bad")) %>%
+  group_by(Reference) %>%
+  mutate(prop = Freq/sum(Freq))
+
+# fill alpha relative to sensitivity/specificity by proportional outcomes within reference groups (see dplyr code above as well as original confusion matrix for comparison)
+ggplot(data = plotTable, mapping = aes(x = Reference, y = Prediction, fill = goodbad, alpha = prop)) +
+  geom_tile() +
+  geom_text(aes(label = Freq), vjust = .5, fontface  = "bold", alpha = 1) +
+  scale_fill_manual(values = c(good = "green", bad = "red")) +
+  theme_bw() +
+  xlim(rev(levels(table$Reference)))+
+  ggtitle("Accuracy : 0.7")
+ggsave('D:/music_feature/fig/confusionMatrix_randomforest_std.png')
+```

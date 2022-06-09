@@ -1,0 +1,181 @@
+```{r include=FALSE}
+#packages
+library(knitr)
+library(dplyr)
+library(flextable)
+library(magrittr)
+library(kableExtra)
+library(tidytext)
+library(tidyverse)
+library(plot.matrix)
+library(stringr)
+library(micropan)
+library(ggpubr)
+library(highcharter)
+library(ggpubr)
+library(tm)
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+library(wordcloud2)
+library(e1071)
+library(nnet)
+library(rpart)
+library(randomForest)
+```
+
+```{r}
+set.seed(19970608)
+multiSample = function(n,g,k){
+  # totally n members
+  # for g groups
+  # take k members from each group
+  if(n%%g==0){
+    ms = c()
+    ng = n/g
+    for(i in 1:g){
+      init = (i-1)*ng+1
+      ms = cbind(ms, sample(init:(i*ng), k, replace = FALSE))
+    }
+    return(sort(ms))
+  }else{
+    print('Error: n could not divided by g')
+  }
+}
+matrix_std = function(df,p){
+  pn = ncol(df)
+  df_std = df[,1:p]
+  df_std = scale(df_std)
+  df_std = as.data.frame(df_std)
+  df_std = cbind(df_std, df[,(p+1):pn])
+  df_std = as.data.frame(df_std)
+  return(df_std)
+}
+
+mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
+
+
+sel = multiSample(1000,10,80)
+
+mu_feat_nu = mu_feat
+Y_nu = as.data.frame(sapply(factor(mu_feat$label), unclass))
+colnames(Y_nu) = 'ladel'
+
+mu_feat_nu$label = Y_nu
+
+colnames(mu_feat_nu[,29]) = 'label'
+rownames(Y_nu) = rownames(mu_feat)
+
+Xtrain_nu = mu_feat_nu[sel,]
+Xtest_nu = mu_feat_nu[-(sel),]
+colnames(Xtrain_nu) = colnames(Xtest_nu) = colnames(mu_feat)
+
+
+Xtrain_nu_std = matrix_std(mu_feat_nu[sel,], 28)
+Xtest_nu_std = matrix_std(mu_feat_nu[-sel,], 28)
+colnames(Xtrain_nu_std) = colnames(Xtest_nu_std) = colnames(mu_feat)
+
+```
+
+# SVM 
+```{r}
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+mufeat_svm = tune.svm(as.factor(label) ~., data = Xtrain,
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+y_pre = predict(mufeat_svm$best.model, Xtest[,-29])
+
+
+confusion_matrix_svm = confusionMatrix(data = y_pre, reference = as.factor(Xtest$label))
+
+confusion_matrix_svm
+```
+
+# SVM std
+```{r}
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+mufeat_svm_std = tune.svm(as.factor(label) ~., data = Xtrain_std,
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+y_pre = predict(mufeat_svm_std$best.model, Xtest_std[,-29])
+
+
+confusion_matrix_svm_std = confusionMatrix(data = y_pre, reference = as.factor(Xtest_std$label))
+
+confusion_matrix_svm_std
+```
+
+
+# logistic reg.
+```{r}
+logreg = multinom(as.factor(label) ~., data = Xtrain)
+
+y_pre = predict(logreg, Xtest[,-29])
+
+
+confusion_matrix_logreg = confusionMatrix(data = y_pre, reference = as.factor(Xtest$label))
+
+confusion_matrix_logreg
+```
+# Logistic reg. std
+```{r}
+logreg_std = multinom(as.factor(label) ~., data = Xtrain_std)
+
+y_pre = predict(logreg, Xtest_std[,-29])
+
+
+confusion_matrix_logreg_std = confusionMatrix(data = y_pre, reference = as.factor(Xtest_std$label))
+
+confusion_matrix_logreg_std
+```
+
+# CART
+```{r}
+cart <- rpart(as.factor(label) ~.,
+   method="class", data = Xtrain)
+
+printcp(cart) # display the results
+plotcp(cart) # visualize cross-validation results
+summary(cart) # detailed summary of splits
+
+# plot tree
+plot(cart, uniform=TRUE,
+   main="Classification Tree for Kyphosis")
+text(cart, use.n=TRUE, all=TRUE, cex=.8)
+
+y_pre = predict(cart, Xtest[,-29])
+
+
+confusion_matrix_cart = confusionMatrix(data = y_pre, reference = as.factor(Xtest$label))
+
+confusion_matrix_cart
+```
+
+#random forest
+```{r}
+set.seed(19970608)
+ranforest <- randomForest(as.factor(label) ~., data = Xtrain)
+
+
+y_pre = predict(ranforest, Xtest[,-29])
+
+
+confusion_matrix_ranforest = confusionMatrix(data = y_pre, reference = as.factor(Xtest$label))
+
+confusion_matrix_ranforest
+```
+
+# randomforest std
+
+```{r}
+set.seed(19970608)
+ranforest_std <- randomForest(as.factor(label) ~., data = Xtrain_std)
+
+
+y_pre = predict(ranforest_std, Xtest_std[,-29])
+
+
+confusion_matrix_ranforest_std = confusionMatrix(data = y_pre, reference = as.factor(Xtest_std$label))
+
+confusion_matrix_ranforest_std
+```
