@@ -35,10 +35,12 @@ confusion_matrix_ranforest
 "Accuracy : 0.69"
 confusion_matrix_ranforest_std
 "Accuracy : 0.7"
+ConMatrix_ohencoding_std
+"Accuracy : 0.64"
 ```
 
 ```{r}
-table <- data.frame(confusion_matrix_ranforest_std$table)
+table <- data.frame(ConMatrix_ohencoding_std$table)
 
 plotTable <- table %>%
   mutate(goodbad = ifelse(table$Prediction == table$Reference, "good", "bad")) %>%
@@ -52,6 +54,6 @@ ggplot(data = plotTable, mapping = aes(x = Reference, y = Prediction, fill = goo
   scale_fill_manual(values = c(good = "green", bad = "red")) +
   theme_bw() +
   xlim(rev(levels(table$Reference)))+
-  ggtitle("Accuracy : 0.7")
-ggsave('D:/music_feature/fig/confusionMatrix_randomforest_std.png')
+  ggtitle("Accuracy : 0.64")
+ggsave('D:/music_feature/fig/confusionMatrix_ohencoding_std.png')
 ```

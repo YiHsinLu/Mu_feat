@@ -63,6 +63,11 @@ if(g==1){
   return(list(id=id, token_list1=token1$word, token_list2=token2$word, df_token_lst=token_list_2g))
 }
 }
+
+lappend <- function (lst, ...){
+  lst <- c(lst, list(...))
+  return(lst)
+}
 ```
 
 
@@ -160,7 +165,7 @@ class(A_std[1,1])
 #std
 
 ```{r}
-set.seed(608*320)
+set.seed(19970608)
 multiSample = function(n,g,k){
   # totally n members
   # for g groups
@@ -176,6 +181,15 @@ multiSample = function(n,g,k){
   }else{
     print('Error: n could not divided by g')
   }
+}
+matrix_std = function(df,p){
+  pn = ncol(df)
+  df_std = df[,1:p]
+  df_std = scale(df_std)
+  df_std = as.data.frame(df_std)
+  df_std = cbind(df_std, df[,(p+1):pn])
+  df_std = as.data.frame(df_std)
+  return(df_std)
 }
 sel = multiSample(1000,10,80)
 mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
@@ -196,21 +210,9 @@ rownames(Xtest_std) = rownames(Xtest)
 
 
 
-```{r}
-
-matrix_std = function(df,p){
-  df_std = df[,1:p]
-  df_std = scale(df_std)
-  df_std = as.data.frame(df_std)
-  df_std = cbind(df_std, df[,(p+1)])
-  df_std = as.data.frame(df_std)
-  return(df_std)
-}
-```
 
 
 ```{r}
-set.seed(608*320)
 library(e1071)
 gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
 
@@ -221,11 +223,62 @@ summary(svm_std)
 ```
 
 ```{r}
+library(ggplot2)
+library(caret)
+
 y_pre = predict(svm_std$best.model, Xtest_std[,-29])
 
 
-Con_Matr = confusionMatrix(Xtest_std$label, y_pre)
+Con_Matr_std = confusionMatrix(data = y_pre, reference = as.factor(Xtest_std$label))
+
+
+Con_Matr_std
+```
+
+```{r}
+set.seed(608*320)
+library(e1071)
+gammalist <- c(0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04,0.045,0.05)
+
+svm_std = tune.svm(as.factor(label) ~., data = Xtrain,
+                 kernel='radial', cost=2^(-1:5), gamma = gammalist)
+
+summary(svm_std)
+```
+
+```{r}
+library(ggplot2)
+library(caret)
+
+y_pre = predict(svm_std$best.model, Xtest[,-29])
+
+
+Con_Matr = confusionMatrix(data = y_pre, reference = as.factor(Xtest$label))
 
 
 Con_Matr
+```
+
+```{r include=FALSE}
+#packages
+library(knitr)
+library(dplyr)
+library(flextable)
+library(magrittr)
+library(kableExtra)
+library(tidytext)
+library(tidyverse)
+library(plot.matrix)
+library(stringr)
+library(micropan)
+library(ggpubr)
+library(highcharter)
+library(ggpubr)
+library(tm)
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+library(wordcloud2)
+library(e1071)
+
 ```

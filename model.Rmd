@@ -75,6 +75,11 @@ Xtrain_nu_std = matrix_std(mu_feat_nu[sel,], 28)
 Xtest_nu_std = matrix_std(mu_feat_nu[-sel,], 28)
 colnames(Xtrain_nu_std) = colnames(Xtest_nu_std) = colnames(mu_feat)
 
+sel = sort(sample(1:1000, size=800, replace = FALSE))
+
+Xtrain_ran = mu_feat[sel,]
+Xtest_ran = mu_feat[-sel,]
+
 ```
 
 # SVM 
@@ -103,6 +108,9 @@ y_pre = predict(mufeat_svm_std$best.model, Xtest_std[,-29])
 confusion_matrix_svm_std = confusionMatrix(data = y_pre, reference = as.factor(Xtest_std$label))
 
 confusion_matrix_svm_std
+```
+```{r}
+logreg
 ```
 
 
@@ -178,4 +186,12 @@ y_pre = predict(ranforest_std, Xtest_std[,-29])
 confusion_matrix_ranforest_std = confusionMatrix(data = y_pre, reference = as.factor(Xtest_std$label))
 
 confusion_matrix_ranforest_std
+```
+
+```{r}
+pca_mufeat = prcomp(mu_feat[,1:28], center = TRUE,scale. = TRUE)
+```
+
+```{r}
+pca_mufeat
 ```

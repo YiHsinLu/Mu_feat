@@ -42,7 +42,8 @@ output:
 library(wordcloud2)
 set.seed(19970608)
 genre_wordCloud = read.csv('D:/music_feature/Data_sets/genre_wordCloud.csv')
-wordcloud2(data=genre_wordCloud, size=0.5, color='random-dark')
+wordCloud = wordcloud2(data=genre_wordCloud, size=0.5, color='random-dark')
+wordCloud
 ```
 
 
@@ -58,16 +59,16 @@ wordcloud2(data=genre_wordCloud, size=0.5, color='random-dark')
 
 ## 2.1 Variables
 
-* tempo
-* beats
-* chroma_stft
-* rmse
-* spectral_centroid
-* spectral_bandwidth
-* rolloff
-* zero_crossing_rate
-* mfcc1~20
-* label
+  \item tempo
+  \item beats
+  \item chroma_stft
+  \item rmse
+  \item spectral_centroid
+  \item spectral_bandwidth
+  \item rolloff
+  \item zero_crossing_rate
+  \item mfcc1~20
+  \item label
 
 ****
 

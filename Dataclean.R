@@ -18,8 +18,6 @@ library("wordcloud")
 library("RColorBrewer")
 library(wordcloud2)
 library(caret)
-library(InformationValue)
-library(ISLR)
 mu_feat = read.csv("D:/NDHU_Master/110-2/KML/Project/Data_sets/data.csv", row.names = 1)
 
 X_mufeat = mu_feat[,-29]
