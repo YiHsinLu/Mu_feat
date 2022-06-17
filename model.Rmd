@@ -22,6 +22,11 @@ library(e1071)
 library(nnet)
 library(rpart)
 library(randomForest)
+library(xgboost)
+library(readr)
+library(stringr)
+library(caret)
+library(car)
 ```
 
 ```{r}
@@ -194,4 +199,108 @@ pca_mufeat = prcomp(mu_feat[,1:28], center = TRUE,scale. = TRUE)
 
 ```{r}
 pca_mufeat
+```
+
+```{r}
+
+set.seed(19970608)
+xgb <- xgboost(data = as.matrix(Xtrain_nu[,-29]), 
+ label = Xtrain_nu$label, 
+ eta = 0.1,
+ max_depth = 15, 
+ nround=25, 
+ subsample = 0.5,
+ colsample_bytree = 0.5,
+ seed = 1,
+ eval_metric = "merror",
+ objective = "multi:softprob",
+ num_class = 12,
+ nthread = 3
+)
+```
+
+````{r}
+Xtrain_xgb <- Xtrain_nu %>%
+  mutate(label = label - 1)
+
+Xtest_xgb <- Xtest_nu %>%
+  mutate(label = label - 1)
+
+summary(Xtrain_xgb)
+
+```
+
+```{r}
+Xtrain_matrix_xgb <- xgb.DMatrix(data = as.matrix(Xtrain_xgb), label = Xtrain_xgb[,'label'])
+
+Xtest_matrix_xgb <- xgb.DMatrix(data = as.matrix(Xtest_xgb), label = Xtest_xgb[,'label'])
+```
+
+```{r}
+set.seed(19970608)
+numberOfClasses <- length(unique(Xtrain_xgb$label))
+xgb_params <- list("objective" = "multi:softprob",
+                   "eval_metric" = "mlogloss",
+                   "num_class" = numberOfClasses)
+nround    <- 50 # number of XGBoost rounds
+cv.nfold  <- 5
+
+# Fit cv.nfold * cv.nround XGB models and save OOF predictions
+cv_model <- xgb.cv(params = xgb_params,
+                   data = Xtrain_matrix_xgb, 
+                   nrounds = nround,
+                   nfold = cv.nfold,
+                   verbose = FALSE,
+                   prediction = TRUE)
+```
+
+```{r}
+OOF_prediction <- data.frame(cv_model$pred) %>%
+  mutate(max_prob = max.col(., ties.method = "last"),
+         label = Xtrain_xgb$label+1)
+head(OOF_prediction)
+```
+
+```{r}
+confusionMatrix(factor(OOF_prediction$max_prob),
+                factor(OOF_prediction$label),
+                mode = "everything")
+```
+
+```{r}
+bst_model <- xgb.train(params = xgb_params,
+                       data = Xtrain_matrix_xgb,
+                       nrounds = nround)
+
+# Predict hold-out test set
+test_pred <- predict(bst_model, newdata = Xtest_matrix_xgb)
+test_prediction <- matrix(test_pred, nrow = numberOfClasses,
+                          ncol=length(test_pred)/numberOfClasses) %>%
+  t() %>%
+  data.frame() %>%
+  mutate(label = Xtest_xgb$label+1,
+         max_prob = max.col(., "last"))
+# confusion matrix of test set
+confusionMatrix(factor(test_prediction$max_prob),
+                factor(test_prediction$label),
+                mode = "everything")
+```
+
+```{r}
+Xtrain_xgb = as.matrix(Xtrain_nu)
+Xtest_xgb = as.matrix(Xtest_nu)
+
+set.seed(19970608)
+xgb = xgboost(data = Xtrain_xgb[,-29], label = Xtrain_xgb[,29], nrounds=200)
+
+```
+
+```{r}
+y_pre = predict(xgb, Xtest_xgb[,-29])
+
+y_pre = round(y_pre)
+
+confusion_matrix_xgb = confusionMatrix(data = as.factor(y_pre), reference = as.factor(Xtest_xgb[,29]))
+
+confusion_matrix_xgb
 ```
