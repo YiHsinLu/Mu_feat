@@ -6,6 +6,17 @@
 \usepackage{subfigure}
 \usepackage{wrapfig}
 \setmainfont{Times New Roman}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\urlstyle{same}
 \begin{document}
 \begin{titlepage}
    \begin{center}
@@ -22,14 +33,14 @@
 
        \vfill
             
-        Statistical Machine Learning Final Presentation
+        Final Presentation for Statistical Machine Learning
             
        \vspace{0.8cm}
      
        \includegraphics[width=0.4\textwidth]{NDHU_logo.png}
             
        National Dong Hwa University\\
-       2022 June 19
+       June 19, 2022
    \end{center}
 \end{titlepage}
 
@@ -37,23 +48,28 @@
 
 \newpage
 
+\addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
-Music genre can be predict by using Fourier transform and waveform analysis from audio to numerical data. For the model I used like SVM and Random Forest, the result was better than the others in Kaggle.
+Music genre can be predicted by using Fourier transform and waveform analysis from audio to numerical data. For the model I used like SVM and Random Forest, the result was better than the others in Kaggle.
 
 
 \section{Introduction}
 \subsection{Motivating Question}
-When I was a child, I started learning chinese music instrument. That was the beginning that having fun for the music, and I realized the music is also a part of science. For an example, A440 is the musical pitch corresponding to an audio frequency of 440 Hz(from Wikipedia), and every instruments have their own waveform. So I decided to have my master degree that I want to use my statistics knowledge on the music I learned before. The music topic is the work direction for statistical machine learning project.
+When I was a child, I started learning chinese music instrument. That was the beginning that having fun for the music, and I realized the music is also a part of science. For an example, A440 is the musical pitch corresponding to an audio frequency of 440 Hz (from Wikipedia), and every instruments have their own waveform. So I decided to have my master degree that I want to use my statistics knowledge on the music I learned before. The music topic is the work direction for statistical machine learning project.
 
 \subsection{Focus Problem}
 A dataset in Kaggle interests me, 1000 audio tracks each 30 seconds long, it contains 10 genres, each represented by 100 tracks. So my problem is:\\
 1. Is the music genre classified by those numerical data?\\
-2. If it can be classified, which model is the best  
+2. If it can be classified, which model is the best for this dataset?
 
 \subsection{Data}
-\includegraphics[width=0.8\textwidth]{data_head.jpg}\\
-\\
-The features in this dataset are extracted from the dataset provided it which consists of 1000 audio tracks each 30 seconds long. It contains 10 genres, each represented by 100 tracks. The tracks are all 22050Hz Mono 16-bit audio files in .wav format. The code used to extract features is at this GitHub repo. Features are extracted using libROSA library.(Content on kaggle)
+\begin{figure}[h]
+    \centering
+    \textbf{Music Feature Dataset}\par\medskip
+    \includegraphics[width=0.8\textwidth]{data_head.jpg}
+\end{figure}
+
+The features in this dataset are extracted from the dataset provided it which consists of 1000 audio tracks each 30 seconds long. It contains 10 genres, each represented by 100 tracks. The tracks are all 22050 Hz Mono 16-bit audio files in .wav format. The code used to extract features is at this GitHub repo. Features are extracted using libROSA library. (Content in kaggle)
 
 \subsection{Variables/Features}
 \begin{itemize}
@@ -68,7 +84,7 @@ The features in this dataset are extracted from the dataset provided it which co
   \item mfcc1-20: Mel-frequency cepstral coefficients (MFCCs) are coefficients that collectively make up an MFC.
 \end{itemize}
 
-\subsection{Genre(label)}
+\subsection{Genres (label)}
 \begin{itemize}
   \item blues
   \item classical
@@ -85,60 +101,97 @@ The features in this dataset are extracted from the dataset provided it which co
 \newpage
 \section{EDA}
 \subsection{Correlation Matrix}
-\includegraphics[width=1.2\textwidth]{correlation_matrix.png}
-\\
-It could be split by three parts in the red area that is the positive high correlation. Then we made the figure of pairs plot fir these three high correlation area.
+\begin{figure}[h]
+    \includegraphics[width=1.2\textwidth]{correlation_matrix.png}
+    \caption{Correlation Matrix}
+\end{figure}
+
+It could be splitted by three parts in the red area that is the positive high correlation. Then we made the figure of pairs plot fir these three high correlation area.
+\newpage
 
 \subsection{Pairs plot}
-\includegraphics[width=0.35\textwidth]{ggpairs1.png}
-\includegraphics[width=0.35\textwidth]{ggpairs2.png}
-\includegraphics[width=0.35\textwidth]{ggpairs3.png}
-\\
-There is a high correlation between tempo and beats about 2 times. And spectral-centroid, spectral-bandwidth and rolloff are the results of spectral analysis, they must have correlation for each variables.
 
-\newpage
-\subsection{PCA(Principle Component Analysis)}
-\includegraphics[width=0.5\textwidth]{pca_feat.png}
-\includegraphics[width=0.5\textwidth]{pca.png}
+\begin{figure}[h]
+    \includegraphics[width=0.9\textwidth]{ggpairs1.png}
+    \caption{Pars plot by ggplot}
+\end{figure}
+There is a high correlation between tempo and beats, and the tempo is about two times of beats. Moreover, spectral-centroid, spectral-bandwidth and rolloff are the results of spectral analysis, they must have correlation for each variables. 
+
+
+\subsection{PCA (Principle Component Analysis)}
+\begin{figure}[h]
+\centering
+    \begin{tabular}{c c}
+        \textbf{\underline{PCA for features}} & \textbf{\underline{PCA for audios}} \\
+        \includegraphics[width=0.5\textwidth]{pca_feat.png} & \includegraphics[width=0.5\textwidth]{pca.png}
+    \end{tabular}
+\caption{PCA}
+\end{figure}
+
+
 
 \section{Models}
 \subsection{Training and Testing data}
-For the balance in this data, taking 80\% as training data and 20 \% as testing data from each genres, so training data contains 10 genres, each represented by 80 tracks. And so does testing data.
+For the balance in this data, taking $80\%$ as training data and $20\%$ as testing data from each genres, so training data contains 10 genres, each represented by 80 tracks. And so does testing data.
 
 \subsection{Logistic Regression}
-\includegraphics[width=0.9\textwidth]{confusionMatrix_logreg.png}
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{confusionMatrix_logreg.png}
+    \caption{Confusion matrix: logistic regression}
+\end{figure}
+
 \newpage
-\subsection{SVM(Support Vector Machine)}
-\includegraphics[width=0.9\textwidth]{confusionMatrix_logreg.png}
-\subsection{SVM(one-hot encoding)}
-Turning this 10 class prediction into a simple version, We do the one-hot encoding for the genres as the figure down below.\\
+
+\subsection{SVM (Support Vector Machine)}
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{confusionMatrix_logreg.png}
+    \caption{Confusion matrix: SVM}
+\end{figure}
+
+\subsection{SVM (one-hot encoding)}
+Turning this 10 class prediction into a simple version, We do the one-hot encoding for the genres as the figure down below.
+
 \begin{center}
-    \includegraphics[width=0.05\textwidth]{y.jpg}$\Longrightarrow$\includegraphics[width=0.6\textwidth]{y_matrix.jpg}
+    \includegraphics[width=0.043\textwidth]{y.jpg}$\Longrightarrow$\includegraphics[width=0.5\textwidth]{y_matrix.jpg}
 \end{center}
 \newpage
-Predict for each genres, and take the highest accuracy to be the predictor.\\
-\\
-\includegraphics[width=0.9\textwidth]{confusionMatrix_ohencoding_std.png}
-\subsection{SVM(scaling)}
-After reading the paper of tuning of SVM, scaling is very essential.\\
-\\
-\includegraphics[width=0.9\textwidth]{confusionMatrix_svm_std.png}
+
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{confusionMatrix_ohencoding_std.png}
+    \caption{Confusion matrix: SVM (one-hot encoding)}
+\end{figure}
+
+\subsection{SVM (scaling)}
+After reading the paper of tuning of SVM, scaling is very essential.
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{confusionMatrix_svm_std.png}
+    \caption{Confusion matrix: SVM (scaling)}
+\end{figure}
 \newpage
 
 \subsection{Random Forest}
-\includegraphics[width=0.9\textwidth]{confusionMatrix_randomforest.png}
-\subsection{Random Forest(scaling)}
-\includegraphics[width=0.9\textwidth]{confusionMatrix_randomforest_std.png}
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{confusionMatrix_randomforest.png}
+    \caption{Confusion matrix: Random forest}
+\end{figure}
+
+\subsection{Random Forest (scaling)}
+\begin{figure}[h]
+    \includegraphics[width=0.75\textwidth]{confusionMatrix_randomforest_std.png}
+    \caption{Confusion matrix: Random forest (scaling)}
+\end{figure}
 
 \newpage
-\section{Conclusion}
+\section{Conclusions}
 \begin{itemize}
-  \item The music could be classified by those signal transform.
-  \item SVM and Random Forest are nice classifier for this dataset.
+  \item The music could be classified by 28 features extracted from signal transform and Fourier analysis.
+  \item SVM and Random Forest are satisfactory classifier for this dataset.
 \end{itemize}
-\subsection{Results}
+
 \begin{center}
 \begin{tabular}{ |c|c| } 
+\hline
+ model & accuracy \\ 
 \hline
  logistic regression & 0.55 \\ 
  \hline\hline
@@ -156,14 +209,16 @@ After reading the paper of tuning of SVM, scaling is very essential.\\
 \end{center}
 
 \newpage
-\section*{Reference}
+
+\addcontentsline{toc}{section}{References}
+\section*{References}
 \begin{itemize}
-  \item (TextBook)Hastie, Tibshirani and Friedman (2009). The Elements of Statistical Learning: Data Mining, Inference and Prediction. 2nd Edition.
-  \item (TextBook)Hardle and Simar (2015). Applied Multivariate Statistical Analysis, 4th Edition.
-  \item (Paper)Chih-Wei Hsu, Chih-Chung Chang, and Chih-Jen Lin (2016). A Practical Guide to Support Vector Classification.
-  \item  Meinard Muller, Stefan Balke (2015). Short-Time Fourier Transform and Chroma Features.
-  \item (Website)Librosa
-  \item (Website)Tempo vs Rhythm
+  \item Trevor Hastie, Robert Tibshirani, Jerome Friedman, The Elements of Statistical Learning: Data Mining, Inference and Prediction, 2nd Edition, Springer, New York, 2009.
+  \item Wolfgang Karl Härdle, Léopold Simar,  Applied Multivariate Statistical Analysis, 4th Edition, Springer, New York, 2015.
+  \item Chih-Wei Hsu, Chih-Chung Chang, Chih-Jen Lin, A Practical Guide to Support Vector Classification. \url{https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf}, 2016 (accessed April 12 2022).
+  \item Meinard Muller, Stefan Balke, Short-Time Fourier Transform and Chroma Features. \url{https://www.audiolabs-erlangen.de/content/05-fau/professor/00-mueller/02-teaching/2020s_apl/1_stft/stft_and_chroma_features.html}, 2015 (accessed June 2 2022).
+  \item Python package Librosa, \url{https://librosa.org/doc/latest/index.html}, 2013 (accessed June 2 2022)
+  \item What's the Difference Between Tempo and Rhythm?, \url{https://www.britannica.com/story/whats-the-difference-between-tempo-and-rhythm}, (accessed June 2 2022)
 \end{itemize}
 
 \end{document}
